@@ -1,2 +1,0 @@
-# ssm-mysql
-ssm-mysql

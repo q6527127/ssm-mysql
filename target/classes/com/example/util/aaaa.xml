@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans>
+            
+       <bean id="testService1" class="com.example.service.TestService1"></bean>
+       <bean id="testService2" class="com.example.service.TestService2"></bean>
+       <!-- 启动加载 -->
+       <bean id="startService" class="com.example.service.SpringIOCBeanConfigStartService" init-method="start"></bean>
+</beans>
