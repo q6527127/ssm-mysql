@@ -42,7 +42,7 @@ import com.example.util.RedisUtil;
 
 /**
  * 数据库测试controller
- * @author xiaodi
+ * @author xiaodi  
  * @date 2017年11月16日 
  */
 @Controller //证明是controller层并且返回json
