@@ -5,8 +5,8 @@
 		 <insert id="addList2"  parameterType="java.util.Map"  useGeneratedKeys="true" keyProperty="id">
 		 INSERT INTO user3( name, age) VALUES 
 			   <foreach collection="list" item="item" index="index" separator=",">
-    				( #{item.name}, #{item.age})
+    				( #{item.name}, #{item.age}) 
 			  </foreach>
 		  </insert>
   </mapper>
-  
+   

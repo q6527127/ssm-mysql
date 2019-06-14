@@ -7,23 +7,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSON;
@@ -34,6 +26,7 @@ import com.example.service.ProductService;
 import com.example.service.TestBeanService;
 import com.example.service.TestService1;
 import com.example.service.TestService2;
+import com.example.util.RandomUtil;
 import com.example.util.RedisUtil;
 
 /**
@@ -142,7 +135,7 @@ public class MysqlController extends baseController{
     
     
     /**
-     * 批量插入返回KEY map 自动插入ID
+     * 多线程批量插入返回KEY map 自动插入ID
      * @param request
      * @param response
      * @return
@@ -151,22 +144,65 @@ public class MysqlController extends baseController{
     @RequestMapping(value = "addList2",method = RequestMethod.GET)
     @ResponseBody
     public  int addList2(HttpServletRequest request,HttpServletResponse response) throws Exception{
-    	List<HashMap<String,Object>>list = new ArrayList<HashMap<String,Object>>();
-    	HashMap<String,Object> map1 = new HashMap<String, Object>();
-    	map1.put("name", "qqq");
-    	map1.put("age", 222);
-    	HashMap<String,Object> map2 = new HashMap<String, Object>();
-    	map2.put("name", "www");
-    	map2.put("age", 222);
-    	HashMap<String,Object> map3 = new HashMap<String, Object>();
-    	map3.put("name", "eee");
-    	map3.put("age", 222);
-    	list.add(map1);
-    	list.add(map2);
-    	list.add(map3);
-    	int count  = productService.addList2(list);
-    	System.out.println(list.toString());
-        return count;
-    }
+    	long time=new Date().getTime();
+    	
+    	for (int i = 0; i < 10; i++) {
+    		new AddDataThread(getList(10000), "Thread"+i).start();
+		}
+    	
+		//new AddDataThread(getList(100000), "Thread1").start();
+		//获取耗时
+		time=new Date().getTime()-time;
 
+    	//int count  = productService.addList2(list);
+    	//System.out.println(list);
+    	return 0;
+    }
+    /**
+     * 获取指定数量数据集合
+     * @param count
+     * @return
+     */
+    private List<HashMap<String,Object>> getList(int count) {
+    	List<HashMap<String,Object>>list = new ArrayList<HashMap<String,Object>>();
+    	for (int i = 0; i < count; i++) {
+	    	HashMap<String,Object> map1 = new HashMap<String, Object>();
+	    	map1.put("name", RandomUtil.getRandomStr(1));
+	    	map1.put("age", RandomUtil.getRandomStr(2));
+	    	list.add(map1);
+    	}
+    	return  list ;
+	}
+    
+    /**
+     * 线程跑批量插入数据
+     * @author xiaodi
+     *
+     */
+    class AddDataThread extends Thread{
+    	List<HashMap<String,Object>> list = null;
+    	/**
+    	 * @param list 需插入的集合
+    	 * @param name 线程名字
+    	 */
+    	public AddDataThread(List<HashMap<String,Object>> list,String name) {
+    		super(name);
+    		this.list=list;
+    		
+		}
+    	@Override
+    	public void run() {
+    		try {
+    			long time=new Date().getTime();
+    			
+				int count  = productService.addList2(list);
+				//获取耗时
+				time=new Date().getTime()-time;
+				System.out.println("ThreadName:"+Thread.currentThread().getName()+"  执行总条数："+count+" 总耗时："+time+"毫秒");
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	}
+    }
 }
